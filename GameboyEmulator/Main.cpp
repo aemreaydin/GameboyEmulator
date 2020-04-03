@@ -42,64 +42,58 @@ struct SRegisters {
 
 	// Somewhat of an hack that makes the registers 16-bit
 	// For the instructions that allow 16-bit read/write
+	uint16_t GetAF() const {
+		return static_cast<uint16_t>(A) << 8 | F;
+	}
 	uint16_t GetBC() const {
 		return static_cast<uint16_t>(B) << 8 | C;
 	}
+	uint16_t GetDE() const {
+		return static_cast<uint16_t>(D) << 8 | E;
+	}
+	uint16_t GetHL() const {
+		return static_cast<uint16_t>(H) << 8 | L;
+	}	
 
-	void SetBC(uint16_t val) {
+	void SetAF(const uint16_t val) {
+		A = (val >> 8) & 0xFF;
+		F = val & 0xFF;
+	}
+	void SetBC(const uint16_t val) {
 		B = (val >> 8) & 0xFF;
 		C = val & 0xFF;
 	}
+	void SetDE(const uint16_t val) {
+		D = (val >> 8) & 0xFF;
+		E = val & 0xFF;
+	}
+	void SetHL(const uint16_t val) {
+		H = (val >> 8) & 0xFF;
+		L = val & 0xFF;
+	}
 };
 
-enum class eInstruction {
-	ADD
+enum class EInstruction {
+	ADD,
+	ADDHL
 };
-enum class eRegisterTarget {
-	A, B, C, D, E, H, L
+enum class ERegisterTarget {
+	A, B, C, D, E, H, L, AF, BC, DE, HL
 };
 
 class Cpu {
 public:
-	SRegisters registers;
-	void Execute(eInstruction instruction, eRegisterTarget registerTarget) {
-		uint8_t value = 0;
+	SRegisters registers{};
+	void Execute(const EInstruction instruction, const ERegisterTarget registerTarget) {
+		
 		switch (instruction)
 		{
-			// Steps for ADD
-			// Read the current value from the target register
-			// Add the value to the value in register A making sure to handle overflow
-			// Update register F(flags)
-			// Write the updated value to register A
-		case eInstruction::ADD:
-			switch (registerTarget)
-			{
-			case eRegisterTarget::A:
-				value = registers.A;
-				break;
-			case eRegisterTarget::B:
-				value = registers.B;
-				break;
-			case eRegisterTarget::C:
-				value = registers.C;				
-				break;
-			case eRegisterTarget::D:
-				value = registers.D;
-				break;
-			case eRegisterTarget::E:
-				value = registers.E;
-				break;
-			case eRegisterTarget::H:
-				value = registers.H;
-				break;
-			case eRegisterTarget::L:
-				value = registers.L;
-				break;
-			default:
-				assert(false);
-				break;
-			}
-			registers.A = add(value);
+
+		case EInstruction::ADD:
+			doAdd(registerTarget);
+			break;
+		case EInstruction::ADDHL:
+			doAddHL(registerTarget);
 			break;
 		default:
 			break;
@@ -108,10 +102,76 @@ public:
 
 private:
 	// Check if int overflew
-	static bool didOverflow(uint8_t a, uint8_t b)
+	static bool didOverflow(const uint8_t a, const uint8_t b)
 	{
 		return (a + b > UINT8_MAX ? true : false);
 	}
+	static bool didOverflow(const uint16_t a, const uint16_t b)
+	{
+		return (a + b > UINT16_MAX ? true : false);
+	}
+
+	// Steps for ADD
+	// Read the current value from the target register
+	// Add the value to the value in register A making sure to handle overflow
+	// Update register F(flags)
+	// Write the updated value to register A
+	void doAdd(const ERegisterTarget registerTarget)
+	{
+		uint8_t value = 0;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::A:
+			value = registers.A;
+			break;
+		case ERegisterTarget::B:
+			value = registers.B;
+			break;
+		case ERegisterTarget::C:
+			value = registers.C;
+			break;
+		case ERegisterTarget::D:
+			value = registers.D;
+			break;
+		case ERegisterTarget::E:
+			value = registers.E;
+			break;
+		case ERegisterTarget::H:
+			value = registers.H;
+			break;
+		case ERegisterTarget::L:
+			value = registers.L;
+			break;
+		default:
+			break;
+		}
+		registers.A = add(value);		
+	}
+	// Will only be used in virtual 16-bit registers
+	void doAddHL(const ERegisterTarget registerTarget)
+	{
+		uint16_t value = 0;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::AF:
+			value = registers.GetAF();
+			break;
+		case ERegisterTarget::BC:
+			value = registers.GetBC();
+			break;
+		case ERegisterTarget::DE:
+			value = registers.GetDE();
+			break;
+		case ERegisterTarget::HL:
+			value = registers.GetHL();
+			break;
+		default:
+			break;
+		}
+		registers.SetHL(addHL(value));
+	}
+	
+	
 	uint8_t add(const uint8_t value) {
 		const uint8_t newValue = registers.A + value;
 		SRegisters::SFlagRegister fReg;
@@ -123,17 +183,25 @@ private:
 
 		return newValue;
 	}
+	// Half carry set if carry from bit 11
+	// Carry set if carry from bit 15
+	uint8_t addHL(const uint16_t value) {
+		const uint16_t newValue = registers.GetHL() + value;
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = newValue == 0;
+		fReg.Subtraction = false;
+		fReg.Carry = didOverflow(registers.GetHL(), value);
+		fReg.HalfCarry = (registers.GetHL() & 0xFFF) + (value & 0xFFF) > 0xFFF;
+		registers.SetFlags(fReg);
 
-
+		return newValue;
+	}
 };
 
 
 
 int main() {
 	Cpu cpu{};
-	cpu.registers.A = 250;
-	cpu.registers.C = 10;
-	cpu.Execute(eInstruction::ADD, eRegisterTarget::C);
 
 	return 0;
 }
