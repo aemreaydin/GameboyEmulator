@@ -75,6 +75,7 @@ struct SRegisters {
 
 enum class EInstruction {
 	ADD,
+	ADDC,
 	ADDHL
 };
 enum class ERegisterTarget {
@@ -91,6 +92,9 @@ public:
 
 		case EInstruction::ADD:
 			doAdd(registerTarget);
+			break;
+		case EInstruction::ADDC:
+			doAddC(registerTarget);
 			break;
 		case EInstruction::ADDHL:
 			doAddHL(registerTarget);
@@ -147,6 +151,37 @@ private:
 		}
 		registers.A = add(value);		
 	}
+	void doAddC(const ERegisterTarget registerTarget)
+	{
+		uint8_t value = 0;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::A:
+			value = registers.A;
+			break;
+		case ERegisterTarget::B:
+			value = registers.B;
+			break;
+		case ERegisterTarget::C:
+			value = registers.C;
+			break;
+		case ERegisterTarget::D:
+			value = registers.D;
+			break;
+		case ERegisterTarget::E:
+			value = registers.E;
+			break;
+		case ERegisterTarget::H:
+			value = registers.H;
+			break;
+		case ERegisterTarget::L:
+			value = registers.L;
+			break;
+		default:
+			break;
+		}
+		registers.A = addC(value);
+	}
 	// Will only be used in virtual 16-bit registers
 	void doAddHL(const ERegisterTarget registerTarget)
 	{
@@ -185,7 +220,7 @@ private:
 	}
 	// Half carry set if carry from bit 11
 	// Carry set if carry from bit 15
-	uint8_t addHL(const uint16_t value) {
+	uint16_t addHL(const uint16_t value) {
 		const uint16_t newValue = registers.GetHL() + value;
 		SRegisters::SFlagRegister fReg;
 		fReg.Zero = newValue == 0;
@@ -196,12 +231,27 @@ private:
 
 		return newValue;
 	}
+	// Also add the carry flag
+	uint8_t addC(const uint8_t value) {
+		const uint8_t newValue = registers.A + value;
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = newValue == 0;
+		fReg.Subtraction = false;
+		fReg.Carry = didOverflow(registers.A, value);
+		fReg.HalfCarry = (registers.A & 0xF) + (value & 0xF) > 0xF;
+		registers.SetFlags(fReg);
+
+		return fReg.Carry ? newValue + 0b1 : newValue;
+	}
 };
 
 
 
 int main() {
 	Cpu cpu{};
+	cpu.registers.A = 250;
+	cpu.registers.B = 10;
+	cpu.Execute(EInstruction::ADDC, ERegisterTarget::B);
 
 	return 0;
 }
