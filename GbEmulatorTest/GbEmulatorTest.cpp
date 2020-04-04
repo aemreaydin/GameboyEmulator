@@ -50,5 +50,21 @@ namespace GbEmulatorTest
 			Assert::AreEqual(4105, static_cast<int>(cpu.registers.GetHL()));
 			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
 		}
+		TEST_METHOD(TestSUB)
+		{
+			cpu.registers.A = 10;
+			cpu.registers.B = 2;
+			cpu.registers.C = 10;
+
+			cpu.Execute(EInstruction::SUB, ERegisterTarget::B);
+			Assert::AreEqual(8, static_cast<int>(cpu.registers.A));
+			Assert::IsFalse(cpu.registers.GetFlags().Carry);
+			Assert::IsFalse(cpu.registers.GetFlags().HalfCarry);
+
+			cpu.Execute(EInstruction::SUB, ERegisterTarget::C);
+			Assert::AreEqual(254, static_cast<int>(cpu.registers.A));
+			Assert::IsTrue(cpu.registers.GetFlags().Carry);
+			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
+		}
 	};
 }
