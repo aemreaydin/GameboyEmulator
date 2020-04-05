@@ -39,6 +39,7 @@ public:
 	}
 
 	void SetFlags(const SFlagRegister fReg) {
+		F = 0;
 		F |= fReg.Zero << SFlagRegister::ZERO_FLAG_POSITION;
 		F |= fReg.Subtraction << SFlagRegister::SUBTRACTION_FLAG_POSITION;
 		F |= fReg.HalfCarry << SFlagRegister::HALF_CARRY_FLAG_POSITION;
@@ -82,7 +83,10 @@ enum class EInstruction {
 	ADD,
 	ADDC,
 	ADDHL,
-	SUB
+	SUB,
+	SUBC,
+	AND,
+	OR
 };
 enum class ERegisterTarget {
 	A, B, C, D, E, H, L, AF, BC, DE, HL
@@ -107,6 +111,15 @@ public:
 			break;
 		case EInstruction::SUB:
 			doSub(registerTarget);
+			break;
+		case EInstruction::SUBC:
+			doSubc(registerTarget);
+			break;
+		case EInstruction::AND:
+			doAndOp(registerTarget);
+			break;
+		case EInstruction::OR:
+			doOrOp(registerTarget);
 			break;
 		default:
 			break;
@@ -245,6 +258,99 @@ private:
 		}
 		registers.A = sub(value);
 	}
+	void doSubc(const ERegisterTarget registerTarget)
+	{
+		u8 value = 0;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::A:
+			value = registers.A;
+			break;
+		case ERegisterTarget::B:
+			value = registers.B;
+			break;
+		case ERegisterTarget::C:
+			value = registers.C;
+			break;
+		case ERegisterTarget::D:
+			value = registers.D;
+			break;
+		case ERegisterTarget::E:
+			value = registers.E;
+			break;
+		case ERegisterTarget::H:
+			value = registers.H;
+			break;
+		case ERegisterTarget::L:
+			value = registers.L;
+			break;
+		default:
+			break;
+		}
+		registers.A = subc(value);
+	}
+	void doAndOp(const ERegisterTarget registerTarget)
+	{
+		u8 value = 0;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::A:
+			value = registers.A;
+			break;
+		case ERegisterTarget::B:
+			value = registers.B;
+			break;
+		case ERegisterTarget::C:
+			value = registers.C;
+			break;
+		case ERegisterTarget::D:
+			value = registers.D;
+			break;
+		case ERegisterTarget::E:
+			value = registers.E;
+			break;
+		case ERegisterTarget::H:
+			value = registers.H;
+			break;
+		case ERegisterTarget::L:
+			value = registers.L;
+			break;
+		default:
+			break;
+		}
+		registers.A = andOp(value);
+	}
+	void doOrOp(const ERegisterTarget registerTarget)
+	{
+		u8 value = 0;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::A:
+			value = registers.A;
+			break;
+		case ERegisterTarget::B:
+			value = registers.B;
+			break;
+		case ERegisterTarget::C:
+			value = registers.C;
+			break;
+		case ERegisterTarget::D:
+			value = registers.D;
+			break;
+		case ERegisterTarget::E:
+			value = registers.E;
+			break;
+		case ERegisterTarget::H:
+			value = registers.H;
+			break;
+		case ERegisterTarget::L:
+			value = registers.L;
+			break;
+		default:
+			break;
+		}
+		registers.A = orOp(value);
+	}
 
 
 	u8 add(const u8 value) {
@@ -292,6 +398,45 @@ private:
 		fReg.Subtraction = true;
 		fReg.Carry = registers.A - value < 0;
 		fReg.HalfCarry = (registers.A & 0xF) - (value & 0xF) < 0;
+		registers.SetFlags(fReg);
+
+		return newValue;
+	}
+	// Sub with carry
+	u8 subc(const u8 value)
+	{
+		const u8 newValue = registers.A - value;
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = newValue == 0;
+		fReg.Subtraction = true;
+		fReg.Carry = registers.A - value < 0;
+		fReg.HalfCarry = (registers.A & 0xF) - (value & 0xF) < 0;
+		registers.SetFlags(fReg);
+
+		return fReg.Carry ? newValue - 0b1 : newValue;
+	}
+	// N, C flags are reset, H is set
+	u8 andOp(const u8 value)
+	{
+		const u8 newValue = registers.A & value;
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = newValue == 0;
+		fReg.Subtraction = false;
+		fReg.Carry = false;
+		fReg.HalfCarry = true;
+		registers.SetFlags(fReg);
+
+		return newValue;
+	}
+	// N, H, C flags are reset
+	u8 orOp(const u8 value)
+	{
+		const u8 newValue = registers.A | value;
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = newValue == 0;
+		fReg.Subtraction = false;
+		fReg.Carry = false;
+		fReg.HalfCarry = false;
 		registers.SetFlags(fReg);
 
 		return newValue;

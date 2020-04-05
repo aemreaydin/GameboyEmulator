@@ -66,5 +66,33 @@ namespace GbEmulatorTest
 			Assert::IsTrue(cpu.registers.GetFlags().Carry);
 			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
 		}
+		TEST_METHOD(TestSUBC)
+		{
+			cpu.registers.A = 8;
+			cpu.registers.B = 10;
+
+			cpu.Execute(EInstruction::SUBC, ERegisterTarget::B);
+			Assert::AreEqual(253, static_cast<int>(cpu.registers.A));
+			Assert::IsTrue(cpu.registers.GetFlags().Carry);
+		}
+		TEST_METHOD(TestAndOr)
+		{
+			cpu.registers.A = 200;
+			cpu.registers.B = 125;
+
+			cpu.Execute(EInstruction::AND, ERegisterTarget::B);
+			Assert::AreEqual(72, static_cast<int>(cpu.registers.A));
+			Assert::IsFalse(cpu.registers.GetFlags().Carry);
+			Assert::IsFalse(cpu.registers.GetFlags().Subtraction);
+			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
+
+			cpu.registers.A = 200;
+			cpu.registers.B = 125;
+			cpu.Execute(EInstruction::OR, ERegisterTarget::B);
+			Assert::AreEqual(253, static_cast<int>(cpu.registers.A));
+			Assert::IsFalse(cpu.registers.GetFlags().Carry);
+			Assert::IsFalse(cpu.registers.GetFlags().Subtraction);
+			Assert::IsFalse(cpu.registers.GetFlags().HalfCarry);
+		}
 	};
 }
