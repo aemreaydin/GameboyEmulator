@@ -11,88 +11,91 @@ namespace GbEmulatorTest
 	TEST_CLASS(GbEmulatorTest)
 	{
 	public:
-		CProcessor cpu;
-		TEST_METHOD(TestADD)
+		CProcessor Cpu;
+
+		TEST_METHOD(TestAdd)
 		{
-			cpu.registers.A = 250;
-			cpu.registers.B = 5;
-			cpu.registers.C = 5;
+			Cpu.Registers.A = 250;
+			Cpu.Registers.B = 5;
+			Cpu.Registers.C = 5;
 
-			cpu.Execute(EInstruction::ADD, ERegisterTarget::B);
-			Assert::AreEqual(255, static_cast<int>(cpu.registers.A));
-			Assert::IsFalse(cpu.registers.GetFlags().Carry);
+			Cpu.Execute(EInstruction::ADD, ERegisterTarget::B);
+			Assert::AreEqual(255, static_cast<int>(Cpu.Registers.A));
+			Assert::IsFalse(Cpu.Registers.GetFlags().Carry);
 
-			cpu.Execute(EInstruction::ADD, ERegisterTarget::C);
-			Assert::AreEqual(4, static_cast<int>(cpu.registers.A));
-			Assert::IsTrue(cpu.registers.GetFlags().Carry);
-			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
+			Cpu.Execute(EInstruction::ADD, ERegisterTarget::C);
+			Assert::AreEqual(4, static_cast<int>(Cpu.Registers.A));
+			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
+			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
 		}
-		TEST_METHOD(TestADDC)
+		TEST_METHOD(TestAddC)
 		{
-			cpu.registers.A = 250;
-			cpu.registers.B = 10;
+			Cpu.Registers.A = 250;
+			Cpu.Registers.B = 10;
 
-			cpu.Execute(EInstruction::ADDC, ERegisterTarget::B);
-			Assert::AreEqual(5, static_cast<int>(cpu.registers.A));
-			Assert::IsTrue(cpu.registers.GetFlags().Carry);
+			Cpu.Execute(EInstruction::ADDC, ERegisterTarget::B);
+			Assert::AreEqual(5, static_cast<int>(Cpu.Registers.A));
+			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
 		}
-		TEST_METHOD(TestADDHL)
+		TEST_METHOD(TestAddHL)
 		{
-			cpu.registers.SetHL(65530);
-			cpu.registers.SetBC(10);
+			Cpu.Registers.SetHL(65530);
+			Cpu.Registers.SetBC(10);
 
-			cpu.Execute(EInstruction::ADDHL, ERegisterTarget::BC);
-			Assert::AreEqual(4, static_cast<int>(cpu.registers.GetHL()));
-			Assert::IsTrue(cpu.registers.GetFlags().Carry);
+			Cpu.Execute(EInstruction::ADDHL, ERegisterTarget::BC);
+			Assert::AreEqual(4, static_cast<int>(Cpu.Registers.GetHL()));
+			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
 
-			cpu.registers.SetHL(4095);
-			cpu.Execute(EInstruction::ADDHL, ERegisterTarget::BC);
-			Assert::AreEqual(4105, static_cast<int>(cpu.registers.GetHL()));
-			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
+			Cpu.Registers.SetHL(4095);
+			Cpu.Execute(EInstruction::ADDHL, ERegisterTarget::BC);
+			Assert::AreEqual(4105, static_cast<int>(Cpu.Registers.GetHL()));
+			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
 		}
-		TEST_METHOD(TestSUB)
+		TEST_METHOD(TestSub)
 		{
-			cpu.registers.A = 10;
-			cpu.registers.B = 2;
-			cpu.registers.C = 10;
+			Cpu.Registers.A = 10;
+			Cpu.Registers.B = 2;
+			Cpu.Registers.C = 10;
 
-			cpu.Execute(EInstruction::SUB, ERegisterTarget::B);
-			Assert::AreEqual(8, static_cast<int>(cpu.registers.A));
-			Assert::IsFalse(cpu.registers.GetFlags().Carry);
-			Assert::IsFalse(cpu.registers.GetFlags().HalfCarry);
+			Cpu.Execute(EInstruction::SUB, ERegisterTarget::B);
+			Assert::AreEqual(8, static_cast<int>(Cpu.Registers.A));
+			Assert::IsFalse(Cpu.Registers.GetFlags().Carry);
+			Assert::IsFalse(Cpu.Registers.GetFlags().HalfCarry);
 
-			cpu.Execute(EInstruction::SUB, ERegisterTarget::C);
-			Assert::AreEqual(254, static_cast<int>(cpu.registers.A));
-			Assert::IsTrue(cpu.registers.GetFlags().Carry);
-			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
+			Cpu.Execute(EInstruction::SUB, ERegisterTarget::C);
+			Assert::AreEqual(254, static_cast<int>(Cpu.Registers.A));
+			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
+			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
 		}
-		TEST_METHOD(TestSUBC)
+		TEST_METHOD(TestSubC)
 		{
-			cpu.registers.A = 8;
-			cpu.registers.B = 10;
+			Cpu.Registers.A = 8;
+			Cpu.Registers.B = 10;
 
-			cpu.Execute(EInstruction::SUBC, ERegisterTarget::B);
-			Assert::AreEqual(253, static_cast<int>(cpu.registers.A));
-			Assert::IsTrue(cpu.registers.GetFlags().Carry);
+			Cpu.Execute(EInstruction::SUBC, ERegisterTarget::B);
+			Assert::AreEqual(253, static_cast<int>(Cpu.Registers.A));
+			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
 		}
 		TEST_METHOD(TestAndOr)
 		{
-			cpu.registers.A = 200;
-			cpu.registers.B = 125;
+			Cpu.Registers.A = 200;
+			Cpu.Registers.B = 125;
+			
+			Cpu.Execute(EInstruction::AND, ERegisterTarget::B);
+			Assert::AreEqual(72, static_cast<int>(Cpu.Registers.A));
+			Assert::IsFalse(Cpu.Registers.GetFlags().Carry);
+			Assert::IsFalse(Cpu.Registers.GetFlags().Subtraction);
+			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
 
-			cpu.Execute(EInstruction::AND, ERegisterTarget::B);
-			Assert::AreEqual(72, static_cast<int>(cpu.registers.A));
-			Assert::IsFalse(cpu.registers.GetFlags().Carry);
-			Assert::IsFalse(cpu.registers.GetFlags().Subtraction);
-			Assert::IsTrue(cpu.registers.GetFlags().HalfCarry);
-
-			cpu.registers.A = 200;
-			cpu.registers.B = 125;
-			cpu.Execute(EInstruction::OR, ERegisterTarget::B);
-			Assert::AreEqual(253, static_cast<int>(cpu.registers.A));
-			Assert::IsFalse(cpu.registers.GetFlags().Carry);
-			Assert::IsFalse(cpu.registers.GetFlags().Subtraction);
-			Assert::IsFalse(cpu.registers.GetFlags().HalfCarry);
+			
+			Cpu.Registers.A = 200;
+			Cpu.Registers.B = 125;
+			
+			Cpu.Execute(EInstruction::OR, ERegisterTarget::B);
+			Assert::AreEqual(253, static_cast<int>(Cpu.Registers.A));
+			Assert::IsFalse(Cpu.Registers.GetFlags().Carry);
+			Assert::IsFalse(Cpu.Registers.GetFlags().Subtraction);
+			Assert::IsFalse(Cpu.Registers.GetFlags().HalfCarry);
 		}
 	};
 }
