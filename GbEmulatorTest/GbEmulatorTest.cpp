@@ -76,7 +76,7 @@ namespace GbEmulatorTest
 			Assert::AreEqual(253, static_cast<int>(Cpu.Registers.A));
 			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
 		}
-		TEST_METHOD(TestAndOr)
+		TEST_METHOD(TestAndOrXor)
 		{
 			Cpu.Registers.A = 200;
 			Cpu.Registers.B = 125;
@@ -96,6 +96,49 @@ namespace GbEmulatorTest
 			Assert::IsFalse(Cpu.Registers.GetFlags().Carry);
 			Assert::IsFalse(Cpu.Registers.GetFlags().Subtraction);
 			Assert::IsFalse(Cpu.Registers.GetFlags().HalfCarry);
+
+			Cpu.Registers.A = 200;
+			Cpu.Registers.B = 125;
+
+			Cpu.Execute(EInstruction::XOR, ERegisterTarget::B);
+			Assert::AreEqual(181, static_cast<int>(Cpu.Registers.A));
+			Assert::IsFalse(Cpu.Registers.GetFlags().Carry);
+			Assert::IsFalse(Cpu.Registers.GetFlags().Subtraction);
+			Assert::IsFalse(Cpu.Registers.GetFlags().HalfCarry);			
+		}
+		TEST_METHOD(TestCp)
+		{
+			Cpu.Registers.A = 200;
+			Cpu.Registers.B = 200;
+
+			Cpu.Execute(EInstruction::CP, ERegisterTarget::B);
+			Assert::AreEqual(200, static_cast<int>(Cpu.Registers.A));
+			Assert::IsTrue(Cpu.GetRegisters().GetFlags().Zero);
+			Assert::IsTrue(Cpu.Registers.GetFlags().Subtraction);
+			Assert::IsFalse(Cpu.Registers.GetFlags().HalfCarry);
+			Assert::IsFalse(Cpu.Registers.GetFlags().Carry);
+
+			Cpu.Registers.A = 8;
+			Cpu.Registers.B = 10;
+			Cpu.Execute(EInstruction::CP, ERegisterTarget::B);
+			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
+			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
+		}
+
+		TEST_METHOD(TestInc)
+		{
+			Cpu.Registers.B = 200;
+
+			Cpu.Execute(EInstruction::INC, ERegisterTarget::B);
+			Assert::AreEqual(201, static_cast<int>(Cpu.Registers.B));
+			Assert::IsFalse(Cpu.GetRegisters().GetFlags().Zero);
+			Assert::IsFalse(Cpu.Registers.GetFlags().Subtraction);
+			Assert::IsFalse(Cpu.Registers.GetFlags().HalfCarry);
+
+			Cpu.Registers.B = 15;
+			Cpu.Execute(EInstruction::INC, ERegisterTarget::B);
+			Assert::AreEqual(16, static_cast<int>(Cpu.Registers.B));
+			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
 		}
 	};
 }

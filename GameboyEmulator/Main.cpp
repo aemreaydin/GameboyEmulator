@@ -1,5 +1,6 @@
 #include "Processor.h"
 
-int main() {
+int main()
+{
 	return 0;
 }

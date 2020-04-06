@@ -2,36 +2,41 @@
 #include "Helpers.h"
 #include "Operations.h"
 
-
 // Gameboy CPU is an 8-bit CPU
 // Has 8 Registers
-class CProcessor {
+class CProcessor
+{
 public:
 	SRegisters Registers{};
-	void Execute(const EInstruction instruction, const ERegisterTarget registerTarget) {
+
+	void Execute(const EInstruction instruction, const ERegisterTarget registerTarget)
+	{
 		switch (instruction)
 		{
 		case EInstruction::ADDHL:
 			do16BitOps(instruction, registerTarget);
 			break;
-		case EInstruction::ADD: 
-		case EInstruction::ADDC: 
-		case EInstruction::SUB: 
-		case EInstruction::SUBC: 
-		case EInstruction::AND: 
+		case EInstruction::ADD:
+		case EInstruction::ADDC:
+		case EInstruction::SUB:
+		case EInstruction::SUBC:
+		case EInstruction::AND:
 		case EInstruction::OR:
+		case EInstruction::XOR:
+		case EInstruction::CP:
+		case EInstruction::INC:
 			do8BitOps(instruction, registerTarget);
 			break;
 		default:
 			break;
 		}
-
 	}
 
-	SRegisters GetRegisters() const
+	[[nodiscard]] SRegisters GetRegisters() const
 	{
 		return Registers;
 	}
+
 private:
 	void do8BitOps(const EInstruction instruction, const ERegisterTarget registerTarget)
 	{
@@ -56,10 +61,19 @@ private:
 		case EInstruction::OR:
 			COperations::OrOp(value, Registers);
 			break;
+		case EInstruction::XOR:
+			COperations::XorOp(value, Registers);
+			break;
+		case EInstruction::CP:
+			COperations::Cp(value, Registers);
+			break;
+		case EInstruction::INC:
+			COperations::Inc(value, Registers, registerTarget);
 		default:
 			break;
 		}
 	}
+
 	void do16BitOps(const EInstruction instruction, const ERegisterTarget registerTarget)
 	{
 		const auto value = getRegisterValueU16(registerTarget);
@@ -72,7 +86,8 @@ private:
 			break;
 		}
 	}
-	U8 getRegisterValueU8(const ERegisterTarget registerTarget) const
+
+	[[nodiscard]] U8 getRegisterValueU8(const ERegisterTarget registerTarget) const
 	{
 		U8 value = 0;
 		switch (registerTarget)
@@ -103,7 +118,8 @@ private:
 		}
 		return value;
 	}
-	U16 getRegisterValueU16(const ERegisterTarget registerTarget) const
+
+	[[nodiscard]] U16 getRegisterValueU16(const ERegisterTarget registerTarget) const
 	{
 		U16 value = 0;
 		switch (registerTarget)
@@ -126,4 +142,3 @@ private:
 		return value;
 	}
 };
-
