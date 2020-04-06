@@ -25,6 +25,7 @@ public:
 		case EInstruction::XOR:
 		case EInstruction::CP:
 		case EInstruction::INC:
+		case EInstruction::DEC:
 			do8BitOps(instruction, registerTarget);
 			break;
 		default:
@@ -69,6 +70,10 @@ private:
 			break;
 		case EInstruction::INC:
 			COperations::Inc(value, Registers, registerTarget);
+			break;
+		case EInstruction::DEC:
+			COperations::Dec(value, Registers, registerTarget);
+			break;
 		default:
 			break;
 		}

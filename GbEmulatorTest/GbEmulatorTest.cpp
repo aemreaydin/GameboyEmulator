@@ -125,10 +125,9 @@ namespace GbEmulatorTest
 			Assert::IsTrue(Cpu.Registers.GetFlags().Carry);
 		}
 
-		TEST_METHOD(TestInc)
+		TEST_METHOD(TestIncDec)
 		{
 			Cpu.Registers.B = 200;
-
 			Cpu.Execute(EInstruction::INC, ERegisterTarget::B);
 			Assert::AreEqual(201, static_cast<int>(Cpu.Registers.B));
 			Assert::IsFalse(Cpu.GetRegisters().GetFlags().Zero);
@@ -138,6 +137,18 @@ namespace GbEmulatorTest
 			Cpu.Registers.B = 15;
 			Cpu.Execute(EInstruction::INC, ERegisterTarget::B);
 			Assert::AreEqual(16, static_cast<int>(Cpu.Registers.B));
+			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
+
+			Cpu.Registers.B = 200;
+			Cpu.Execute(EInstruction::DEC, ERegisterTarget::B);
+			Assert::AreEqual(199, static_cast<int>(Cpu.Registers.B));
+			Assert::IsFalse(Cpu.GetRegisters().GetFlags().Zero);
+			Assert::IsTrue(Cpu.Registers.GetFlags().Subtraction);
+			Assert::IsFalse(Cpu.Registers.GetFlags().HalfCarry);
+
+			Cpu.Registers.B = 0;
+			Cpu.Execute(EInstruction::DEC, ERegisterTarget::B);
+			Assert::AreEqual(255, static_cast<int>(Cpu.Registers.B));
 			Assert::IsTrue(Cpu.Registers.GetFlags().HalfCarry);
 		}
 	};

@@ -158,4 +158,42 @@ public:
 			break;
 		}
 	}
+	
+	static void Dec(const U8 value, SRegisters& registers, const ERegisterTarget registerTarget)
+	{
+		const auto newValue = value - 1;
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = newValue == 0;
+		fReg.Subtraction = true;
+		fReg.HalfCarry = (value & 0xF) - (1 & 0xF) < 0;
+		fReg.Carry = registers.GetFlags().Carry;
+		registers.SetFlags(fReg);
+
+		switch (registerTarget)
+		{
+		case ERegisterTarget::A:
+			registers.A = newValue;
+			break;
+		case ERegisterTarget::B:
+			registers.B = newValue;
+			break;
+		case ERegisterTarget::C:
+			registers.C = newValue;
+			break;
+		case ERegisterTarget::D:
+			registers.D = newValue;
+			break;
+		case ERegisterTarget::E:
+			registers.E = newValue;
+			break;
+		case ERegisterTarget::H:
+			registers.H = newValue;
+			break;
+		case ERegisterTarget::L:
+			registers.L = newValue;
+			break;
+		default:
+			break;
+		}
+	}
 };
