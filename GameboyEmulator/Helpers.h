@@ -17,6 +17,8 @@ enum class EInstruction
 	CP,
 	INC,
 	DEC,
+	INC16,
+	DEC16,
 	CCF,
 	SCF,
 	RRA,
@@ -49,7 +51,8 @@ enum class ERegisterTarget
 	AF,
 	BC,
 	DE,
-	HL
+	HL,
+	UNK
 };
 
 struct SRegisters

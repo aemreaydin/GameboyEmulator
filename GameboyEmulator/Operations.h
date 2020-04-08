@@ -123,7 +123,7 @@ public:
 
 	static void Inc(const U8 value, SRegisters& registers, const ERegisterTarget registerTarget)
 	{
-		const auto newValue = value + 1;
+		const U8 newValue = value + 1;
 		SRegisters::SFlagRegister fReg;
 		fReg.Zero = newValue == 0;
 		fReg.Subtraction = false;
@@ -161,7 +161,7 @@ public:
 	
 	static void Dec(const U8 value, SRegisters& registers, const ERegisterTarget registerTarget)
 	{
-		const auto newValue = value - 1;
+		const U8 newValue = value - 1;
 		SRegisters::SFlagRegister fReg;
 		fReg.Zero = newValue == 0;
 		fReg.Subtraction = true;
@@ -195,5 +195,117 @@ public:
 		default:
 			break;
 		}
+	}
+	// TODO: No idea what to do with ADD SP, n
+
+
+	static void Inc16(const U16 value, SRegisters& registers, const ERegisterTarget registerTarget)
+	{
+		const U16 newValue = value + 1;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::BC:
+			registers.SetBC(newValue);
+			break;
+		case ERegisterTarget::DE:
+			registers.SetDE(newValue);
+			break;
+		case ERegisterTarget::HL:
+			registers.SetHL(newValue);
+			break;
+		default:
+			break;
+		}
+	}
+
+	static void Dec16(const U16 value, SRegisters& registers, const ERegisterTarget registerTarget)
+	{
+		const U16 newValue = value - 1;
+		switch (registerTarget)
+		{
+		case ERegisterTarget::BC:
+			registers.SetBC(newValue);
+			break;
+		case ERegisterTarget::DE:
+			registers.SetDE(newValue);
+			break;
+		case ERegisterTarget::HL:
+			registers.SetHL(newValue);
+			break;
+		default:
+			break;
+		}
+	}
+
+	static void Swap(const U8 value, SRegisters& registers, const ERegisterTarget registerTarget)
+	{
+		const U8 newValue = (value & 0x0F) << 4 | (value & 0xF0) >> 4;
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = newValue == 0;
+		fReg.Subtraction = false;
+		fReg.HalfCarry = false;
+		fReg.Carry = false;
+		registers.SetFlags(fReg);
+
+		switch (registerTarget)
+		{
+		case ERegisterTarget::A:
+			registers.A = newValue;
+			break;
+		case ERegisterTarget::B:
+			registers.B = newValue;
+			break;
+		case ERegisterTarget::C:
+			registers.C = newValue;
+			break;
+		case ERegisterTarget::D:
+			registers.D = newValue;
+			break;
+		case ERegisterTarget::E:
+			registers.E = newValue;
+			break;
+		case ERegisterTarget::H:
+			registers.H = newValue;
+			break;
+		case ERegisterTarget::L:
+			registers.L = newValue;
+			break;
+		default:
+			break;
+		}
+	}
+
+	// TODO: DAA
+
+	static void Cpl(SRegisters& registers)
+	{
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = registers.GetFlags().Zero;
+		fReg.Subtraction = true;
+		fReg.HalfCarry = true;
+		fReg.Carry = registers.GetFlags().Carry;
+		registers.SetFlags(fReg);
+
+		registers.A = ~(registers.A);
+	}
+
+	static void Ccf(SRegisters& registers)
+	{
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = registers.GetFlags().Zero;
+		fReg.Subtraction = false;
+		fReg.HalfCarry = false;
+		fReg.Carry = !registers.GetFlags().Carry;
+		registers.SetFlags(fReg);
+	}
+
+	static void Scf(SRegisters& registers)
+	{
+		SRegisters::SFlagRegister fReg;
+		fReg.Zero = registers.GetFlags().Zero;
+		fReg.Subtraction = false;
+		fReg.HalfCarry = false;
+		fReg.Carry = true;
+		registers.SetFlags(fReg);
 	}
 };

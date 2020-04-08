@@ -14,6 +14,8 @@ public:
 		switch (instruction)
 		{
 		case EInstruction::ADDHL:
+		case EInstruction::INC16:
+		case EInstruction::DEC16:
 			do16BitOps(instruction, registerTarget);
 			break;
 		case EInstruction::ADD:
@@ -26,6 +28,10 @@ public:
 		case EInstruction::CP:
 		case EInstruction::INC:
 		case EInstruction::DEC:
+		case EInstruction::CPL:
+		case EInstruction::SWAP:
+		case EInstruction::CCF:
+		case EInstruction::SCF:
 			do8BitOps(instruction, registerTarget);
 			break;
 		default:
@@ -74,6 +80,18 @@ private:
 		case EInstruction::DEC:
 			COperations::Dec(value, Registers, registerTarget);
 			break;
+		case EInstruction::SWAP:
+			COperations::Swap(value, Registers, registerTarget);
+			break;
+		case EInstruction::CPL:
+			COperations::Cpl(Registers);
+			break;
+		case EInstruction::CCF:
+			COperations::Ccf(Registers);
+			break;
+		case EInstruction::SCF:
+			COperations::Scf(Registers);
+			break;
 		default:
 			break;
 		}
@@ -86,6 +104,12 @@ private:
 		{
 		case EInstruction::ADDHL:
 			COperations::AddHL(value, Registers);
+			break;
+		case EInstruction::INC16:
+			COperations::Inc16(value, Registers, registerTarget);
+			break;
+		case EInstruction::DEC16:
+			COperations::Dec16(value, Registers, registerTarget);
 			break;
 		default:
 			break;
